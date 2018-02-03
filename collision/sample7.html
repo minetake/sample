@@ -1,0 +1,452 @@
+
+<html>
+<head>
+<style type="text/css">canvas { background:#FAFAFA; }</style>
+<script>
+
+var cnt = 0;
+
+function goAnima() {
+
+	//setInterval("setup()",50);
+
+	setup();
+
+}
+
+// -------------------------------- //
+// タイル生成function
+// -------------------------------- //
+var SetA = function(h,x,y) {
+	
+	var r = new Array();
+	
+	r[0] = {
+		x : h * 0 + x,
+		y : h * 0 + y,
+		width : h,
+		height : h
+	};
+
+	r[1] = {
+		x : h * 1 + x,
+		y : h * 0 + y,
+		width : h,
+		height : h
+	};
+
+	r[2] = {
+		x : h * 0 + x,
+		y : h * 1 + y,
+		width : h,
+		height : h
+	};
+
+	r[3] = {
+		x : h * 1 + x,
+		y : h * 1 + y,
+		width : h,
+		height : h
+	};
+	
+	return r;
+	
+};
+
+// -------------------------------- //
+// ＸＹの値からタイル番号を取得する
+// -------------------------------- //
+var getTile = function(b,x,y){
+
+		var u = b/8;
+		var bx = x / u;
+		var by = y / u;		
+
+		// int
+		bx = parseInt(bx);
+		by = parseInt(by);
+
+		// binary number
+		var bitx = bx.toString(2);
+		var bity = by.toString(2);
+	
+		// zerofill	
+		bitx = ( '00' + bitx ).slice( -3 );
+		bity = ( '00' + bity ).slice( -3 );
+	
+		// array	
+		var bitx = bitx.split('');
+		var bity = bity.split('');
+		
+		// alternately
+		var t = "";
+		for ( var i=0; i<bitx.length; i++ ) {
+			t += bity[i]+bitx[i];
+		}
+		
+		// change number
+		var tt = parseInt(t,2);
+		
+		var p = Math.pow(4,3);
+		p = p - 1;
+		p = p / (4 - 1);
+		p = p + tt;
+
+		return p;
+
+};
+
+// -------------------------------- //
+// 内積の角度
+// -------------------------------- //
+var getL = function(vx,vy,ux,uy){
+
+	var a = vx - ux;
+	var b = vy - uy;
+
+	var aa = Math.pow(a,2);
+	var bb = Math.pow(b,2);
+
+	var cc = aa + bb;
+	var c = Math.sqrt(cc); 
+
+	return c;
+
+};
+var getAngle = function(vx,vy,ux,uy){
+
+	var radV = Math.atan2(vy, vx);
+	var radU = Math.atan2(uy,ux);
+	var r = radV - radU;
+	var d = r * 180 / Math.PI;
+
+	return d;
+
+};
+// -------------------------------- //
+// 移動する円の中心と線分までの距離
+// -------------------------------- //
+var getLength = function(red,x1,x2,y1,y2) {
+
+	// green.x.
+	var _x = x2 - x1;
+	// green.y
+	var _y = y2 - y1;
+	// p.x
+	var p_x = red.x - x1;	
+	// p.y
+	var p_y = red.y - y1;
+	// d
+ 	var d = ( ( _x * p_y ) - ( _y * p_x ) ) / ( x1 - x2 );
+
+	return d;
+
+};
+
+var setup = function(){
+
+	var canvas = document.getElementById('MyCanvas');
+	if ( canvas.getContext ) {
+		var ctx = canvas.getContext('2d');
+		var w = canvas.width;
+		var h = canvas.height;
+		var l = new Array();
+		var lp = new Array();
+
+		ctx.clearRect(0, 0, w, h);
+
+		cnt = cnt + 1;
+
+		// 移動する円
+/*
+		var red = {
+			x : cnt,
+			y : cnt,
+			r : 30,
+		};
+*/
+
+		// 移動する円
+		var red = {
+			x : 125,
+			y : 125,
+			r : 30,
+		};
+
+		// 移動する円のタイル番号
+		var p1 = getTile(500,red.x-red.r,red.y-red.r);
+		var p2 = getTile(500,red.x+red.r,red.y-red.r);
+		var p3 = getTile(500,red.x-red.r,red.y+red.r);
+		var p4 = getTile(500,red.x+red.r,red.y+red.r);
+		
+		// 衝突判定する線分
+		l[0] = {
+			x1 : 70,
+			y1 : 125,
+			x2 : 200,
+			y2 : 180
+		};
+
+		// 線分のタイル番号
+		lp[0] = new Array();
+		lp[0][0] = getTile(500,l[0].x1,l[0].y1);
+		lp[0][1] = getTile(500,125,125);
+		lp[0][2] = getTile(500,l[0].x2,l[0].y2);
+
+		l[1] = {
+			x1 : 210,
+			y1 : 150,
+			x2 : 300,
+			y2 : 180
+		};
+
+		// 線分のタイル番号
+		lp[1] = new Array();
+		lp[1][0] = getTile(500,l[1].x1,l[1].y1);
+		lp[1][1] = getTile(500,l[1].x2,l[1].y2);
+
+		l[2] = {
+			x1 : 40,
+			y1 : 300,
+			x2 : 200,
+			y2 : 270 
+		};
+
+		// 線分のタイル番号
+		lp[2] = new Array();
+		lp[2][0] = getTile(500,l[2].x1,l[2].y1);
+		lp[2][1] = getTile(500,62.5,250);
+		lp[2][2] = getTile(500,125,250);
+		lp[2][3] = getTile(500,l[2].x2,l[2].y2);
+/*
+		l[3] = {
+			x1 : 290,
+			y1 : 300,
+			x2 : 400,
+			y2 : 270
+		};
+
+		// 線分のタイル番号
+		lp[3] = new Array();
+		lp[3][0] = getTile(500,l[3].x1,l[3].y1);
+		lp[3][1] = getTile(500,312.5,250);
+		lp[3][2] = getTile(500,l[3].x2,l[3].y2);
+*/
+		// 碁盤の目を各線
+		var line1 = {
+			x1 : 0,
+			y1 : 0,
+			x2 : 0,
+			y2 : 500,
+		};
+
+		var line2 = {
+			x1 : 0,
+			y1 : 0,
+			x2 : 500,
+			y2 : 0,
+		};
+
+		var x = 62.5;
+		var y = 62.5;
+		for (var i=0; i<=8; i++ ) {
+
+			var line1 = {
+				x1 : x * i,
+				y1 : 0,
+				x2 : x * i,
+				y2 : 500,
+			};
+
+			var line2 = {
+				x1 : 0,
+				y1 : y * i,
+				x2 : 500,
+				y2 : y * i,
+			};
+		
+			ctx.strokeStyle = 'rgb(0, 0, 0)';
+			ctx.moveTo(line1.x1, line1.y1);
+			ctx.lineTo(line1.x2, line1.y2);
+			ctx.stroke();
+			ctx.strokeStyle = 'rgb(0, 0, 0)';
+			ctx.moveTo(line2.x1, line2.y1);
+			ctx.lineTo(line2.x2, line2.y2);
+			ctx.stroke();
+		
+		}
+
+
+		// ---------------------------------- //
+		// 範囲判定のマスを登録
+		// ---------------------------------- //
+		var blue = [];
+		
+		// L0マス
+		blue[0] = {
+			x : 0,
+			y : 0,
+			width : 500,
+			height : 500
+		};
+
+		var tile = new Array();
+
+		// L1マス
+		tile.push([250,0,0]);
+		
+		// L2マス
+		tile.push([125,0,0]);
+		tile.push([125,250,0]);
+		tile.push([125,0,250]);
+		tile.push([125,250,250]);
+		
+		// L3マス左上
+		tile.push([62.5,0,0]);
+		tile.push([62.5,125,0]);
+		tile.push([62.5,0,125]);
+		tile.push([62.5,125,125]);
+		// L3マス右上
+		tile.push([62.5,250,0]);
+		tile.push([62.5,375,0]);
+		tile.push([62.5,250,125]);
+		tile.push([62.5,375,125]);
+		// L3マス左下
+		tile.push([62.5,0,250]);
+		tile.push([62.5,125,250]);
+		tile.push([62.5,0,375]);
+		tile.push([62.5,125,375]);
+		// L3マス右下
+		tile.push([62.5,250,250]);
+		tile.push([62.5,375,250]);
+		tile.push([62.5,250,375]);
+		tile.push([62.5,375,375]);
+
+		for ( var i = 0; i<tile.length; i++ ) {
+			var r = SetA(tile[i][0],tile[i][1],tile[i][2]);		
+			for ( var ii = 0; ii<r.length; ii++ ) {		
+				blue.push(r[ii]);
+			}		
+		}
+
+		for ( var i = 0; i<blue.length; i++ ) {
+
+			ctx.beginPath();
+			ctx.globalAlpha = 0.2;
+			ctx.fillStyle = 'rgb(155, 197, 89)';
+			ctx.rect(blue[i].x, blue[i].y, blue[i].width, blue[i].height);
+			ctx.fill();
+
+		}
+
+		// ---------------------------------- //
+		// 移動する円が接触したらマスの色を変える
+		// ---------------------------------- //
+		ctx.beginPath();
+		ctx.globalAlpha = 0.2;
+		ctx.fillStyle = 'rgb(192, 80, 77)';
+		ctx.rect(blue[p1].x, blue[p1].y, blue[p1].width, blue[p1].height);
+		ctx.fill();
+
+		ctx.beginPath();
+		ctx.globalAlpha = 0.2;
+		ctx.fillStyle = 'rgb(192, 80, 77)';
+		ctx.rect(blue[p2].x, blue[p2].y, blue[p2].width, blue[p2].height);
+		ctx.fill();
+
+		ctx.beginPath();
+		ctx.globalAlpha = 0.2;
+		ctx.fillStyle = 'rgb(192, 80, 77)';
+		ctx.rect(blue[p3].x, blue[p3].y, blue[p3].width, blue[p3].height);
+		ctx.fill();
+
+		ctx.beginPath();
+		ctx.globalAlpha = 0.2;
+		ctx.fillStyle = 'rgb(192, 80, 77)';
+		ctx.rect(blue[p4].x, blue[p4].y, blue[p4].width, blue[p4].height);
+		ctx.fill();
+
+		// ---------------------------------- //
+		// 対象線分のマス
+		// ---------------------------------- //
+		var d = red.r;
+		var da;
+		var db;
+		for ( var x = 0; x<lp.length; x++ ) {
+
+			ctx.beginPath();
+			ctx.globalAlpha = 1.0;
+
+			// 線分のエリアと円のエリアが重なったら色を変える
+			if( lp[x].indexOf(p1) >= 0
+			|| lp[x].indexOf(p2) >= 0
+			|| lp[x].indexOf(p3) >= 0
+			|| lp[x].indexOf(p4) >= 0 ) {
+				ctx.strokeStyle = 'rgb(255, 255, 255)';
+				// 移動する円と対象物の距離を取得
+				var da = getL(red.x,red.y,l[x].x1,l[x].y1);
+				var db = getL(red.x,red.y,l[x].x2,l[x].y2);
+				var ea = getAngle(red.x,red.y,l[x].x1,l[x].y1);
+				var eb = getAngle(red.x,red.y,l[x].x2,l[x].y2);
+
+console.log("da : "+da);
+console.log("db : "+db);
+console.log("ea : "+ea);
+console.log("eb : "+eb);
+
+				d = getLength(red,l[x].x1,l[x].x2,l[x].y1,l[x].y2);
+			} else {
+				ctx.strokeStyle = 'rgb(100, 100, 89)';
+			}
+			
+			ctx.moveTo(l[x].x1, l[x].y1);
+			ctx.lineTo(l[x].x2, l[x].y2);
+			ctx.stroke();
+		
+			for ( var xx = 0; xx<lp[x].length; xx++ ) {	
+			
+				ctx.beginPath();
+				ctx.globalAlpha = 0.2;
+				ctx.fillStyle = 'rgb(192, 80, 77)';
+				ctx.rect(blue[lp[x][xx]].x, blue[lp[x][xx]].y, blue[lp[x][xx]].width, blue[lp[x][xx]].height);
+				ctx.fill();
+			
+			}
+		
+		}
+
+		// ---------------------------------- //
+		// 衝突すれば移動する円の色を変える
+		// ---------------------------------- //
+		ctx.beginPath();
+		ctx.globalAlpha = 1.0;
+		//if ( d < red.r && ( da < red.r || db < red.r )) {
+		if ( d < red.r ) {
+			ctx.fillStyle = 'rgb(155, 198, 89)';
+		} else {
+			ctx.fillStyle = 'rgb(192, 80, 77)';
+		}
+		ctx.arc(red.x, red.y, red.r, 0, Math.PI*2, false);
+		ctx.fill();
+		ctx.beginPath();
+
+	}
+
+	if ( cnt === 500 ) {
+	
+		cnt = 0;
+		
+	}  
+
+};
+</script>
+</head>
+<body onload="goAnima();">
+<canvas id="MyCanvas" width="500" height="500"></canvas>
+</body>
+</html>
+
+
+
+
+

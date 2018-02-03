@@ -1,0 +1,93 @@
+<html>
+<head>
+<style type="text/css">canvas { background:#FAFAFA; }</style>
+<script>
+
+var cnt = 0;
+
+function goAnima() {
+
+	setInterval("setup()",100);	
+
+}
+
+var setup = function(){
+    var canvas = document.getElementById('MyCanvas');
+    if ( canvas.getContext ) {
+        var ctx = canvas.getContext('2d');
+		var w = canvas.width;
+		var h = canvas.height;
+		ctx.clearRect(0, 0, w, h);
+		cnt = cnt + 1;
+
+console.log(cnt);
+
+        var red = {
+            x : 100,
+            y : cnt,
+            r : 30,
+        };
+
+        var green = {
+            x1 : 50,
+            y1 : 125,
+            x2 : 200,
+            y2 : 180,
+        };
+
+	// green.x.
+	var green_x = green.x2 - green.x1;
+	// green.y
+	var green_y = green.y2 - green.y1;
+	// p.x
+	var p_x = red.x - green.x1;	
+	// p.y
+	var p_y = red.y - green.y1;
+	// d
+ 	var d = ( ( green_x * p_y ) - ( green_y * p_x ) ) / ( green.x1 - green.x2 );
+
+	console.log(d);
+
+        // 当たり判定
+//        if ( d < red.r ) {
+//            console.log("hit"); // 衝突
+//        }
+
+/*
+x 円の中心座標 
+y 円の中心座標
+radius 円の半径
+startAngle 円の書き始め
+endangle 円の終わり
+anticlockwise 円弧を描く向きtrue : 反時計回りfalse : 時計回り
+*/
+
+        ctx.beginPath();
+		
+        if ( d < red.r ) {
+        ctx.fillStyle = 'rgb(155, 198, 89)';
+		} else {
+        ctx.fillStyle = 'rgb(192, 80, 77)';
+		}
+	ctx.arc(red.x, red.y, red.r, 0, Math.PI*2, false);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgb(155, 197, 89)';
+	ctx.moveTo(green.x1, green.y1);
+	ctx.lineTo(green.x2, green.y2);
+        ctx.stroke();
+
+
+    }
+};
+</script>
+</head>
+<body onload="goAnima();">
+<canvas id="MyCanvas" width="500" height="500"></canvas>
+</body>
+</html>
+
+
+
+
+
