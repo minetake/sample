@@ -2,11 +2,11 @@
 	
 	var SubClass = function(obj) {
 		
-		obj.textPrint = function() {
-			
-			console.log("test 2 : " + name);
-			
-		}		
+//		obj.textPrint = function() {
+//			
+//			console.log("test 2 : " + name);
+//			
+//		}		
 		
 	};
 	

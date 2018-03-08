@@ -17,6 +17,10 @@
 			
 			console.log("test 1 : " + name);
 			
+			$(document).ready(function() {
+				$('#example').DataTable();
+			});			
+			
 		}
 		
 		var context = {
